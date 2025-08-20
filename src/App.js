@@ -22,16 +22,27 @@ function App() {
     formData.append('audio', file);
 
     try {
-      // Simulate progress updates
+      // Simulate smooth progress updates with exponential decay
+      const startTime = Date.now();
       const progressInterval = setInterval(() => {
         setProcessingProgress(prev => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return prev;
+          const elapsed = Date.now() - startTime;
+          // Use exponential approach to 95% over time, then slow crawl to 98%
+          let targetProgress;
+          if (elapsed < 30000) { // First 30 seconds: quick progress to 95%
+            targetProgress = 95 * (1 - Math.exp(-elapsed / 10000));
+          } else { // After 30 seconds: slow crawl from 95% to 98%
+            const extraTime = elapsed - 30000;
+            targetProgress = 95 + 3 * (1 - Math.exp(-extraTime / 20000));
           }
-          return prev + Math.random() * 10;
+          
+          // Smooth transition towards target
+          const diff = targetProgress - prev;
+          const increment = Math.max(0.1, diff * 0.1); // At least 0.1% progress each update
+          
+          return Math.min(98, prev + increment);
         });
-      }, 1000);
+      }, 500); // Update every 500ms for smoother animation
 
       const response = await fetch('/api/separate', {
         method: 'POST',
