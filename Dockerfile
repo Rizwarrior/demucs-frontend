@@ -40,6 +40,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Set environment variables for audio backends
 ENV TORCHAUDIO_BACKEND=soundfile
+ENV PYTORCH_ENABLE_MPS_FALLBACK=1
+ENV OMP_NUM_THREADS=1
 
 # Copy the Flask server
 COPY server.py .

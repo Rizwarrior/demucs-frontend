@@ -79,12 +79,23 @@ def separate_audio():
             
             # Run demucs command with output to temp directory
             output_dir = os.path.join(temp_dir, 'separated')
-            cmd = ['demucs', '--out', output_dir, file_path]
+            cmd = ['demucs', '--device', 'cpu', '--out', output_dir, file_path]
             
             result = subprocess.run(cmd, capture_output=True, text=True, env=env)
             
             if result.returncode != 0:
-                return jsonify({'error': f'Demucs processing failed with return code {result.returncode}: {result.stderr}'}), 500
+                # Combine both stdout and stderr for complete error info
+                error_output = ""
+                if result.stdout:
+                    error_output += f"STDOUT: {result.stdout}\n"
+                if result.stderr:
+                    error_output += f"STDERR: {result.stderr}"
+                
+                # Also log the full error for debugging
+                print(f"Demucs failed with return code {result.returncode}")
+                print(f"Full error output: {error_output}")
+                
+                return jsonify({'error': f'Demucs processing failed with return code {result.returncode}: {error_output}'}), 500
             
             # Find the output directory (Demucs creates subdirectories)
             base_name = os.path.splitext(filename)[0]
