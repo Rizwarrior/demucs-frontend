@@ -66,8 +66,17 @@ def separate_audio():
         temp_dir = tempfile.mkdtemp(prefix=f"demucs_{session_id}_")
         
         try:
-            # Save uploaded file to temp directory
-            filename = secure_filename(file.filename)
+            # Save uploaded file to temp directory with clean filename
+            original_filename = secure_filename(file.filename)
+            # Remove any problematic characters and ensure proper extension
+            base_name = os.path.splitext(original_filename)[0]
+            extension = os.path.splitext(original_filename)[1].lower()
+            
+            # Clean the base name to avoid issues
+            import re
+            clean_base = re.sub(r'[^\w\-_\.]', '_', base_name)
+            filename = f"{clean_base}{extension}"
+            
             file_path = os.path.join(temp_dir, filename)
             file.save(file_path)
             
@@ -138,7 +147,7 @@ def separate_audio():
             # Store session data in memory
             active_sessions[session_id] = {
                 'tracks': track_data,
-                'original_filename': filename,
+                'original_filename': original_filename,  # Use original filename for display
                 'created_at': time.time(),
                 'temp_dir': temp_dir
             }
