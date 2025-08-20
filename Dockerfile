@@ -27,11 +27,19 @@ WORKDIR /app
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     ffmpeg \
+    libsndfile1 \
+    libsndfile1-dev \
+    libsox-dev \
+    libsox-fmt-all \
+    sox \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Set environment variables for audio backends
+ENV TORCHAUDIO_BACKEND=soundfile
 
 # Copy the Flask server
 COPY server.py .
